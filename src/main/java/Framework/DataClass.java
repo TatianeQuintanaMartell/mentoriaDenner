@@ -4,7 +4,7 @@ public class DataClass {
 
     public static Object[][] cepvalido(){
         FileOperation.setProperties("cep","cepasertestado", "01001000");
-        return new Object[][]{{"01001000"}};
+        return new Object[][]{{"01001000"},{"91786280"}};
     }
 
     public static Object[][] cepinexistente(){
@@ -16,7 +16,5 @@ public class DataClass {
         return new Object[][]{{"999999xx"}};
     }
 
-    protected static final String BASE_URI = "https://viacep.com.br";
-    protected static String cep = FileOperation.getProperties("cep").getProperty("cepASerTestado");
-    protected static String basePath = "/ws/"+cep+"/json/";
+
 }

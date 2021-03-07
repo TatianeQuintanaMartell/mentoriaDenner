@@ -1,7 +1,7 @@
 package TestCases;
 
-import Framework.FileOperation;
 import Framework.TestBaseApi;
+import Validations.ValidCepValidations;
 import io.qameta.allure.Description;
 import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;
@@ -12,21 +12,25 @@ import static io.restassured.RestAssured.given;
 
 public class GetConsultaCepApi extends TestBaseApi {
 
+    private final String[] FIELDS = {"cep","logradouro"};
+
     @Description("Teste de Contrato")
     @ParameterizedTest
     @MethodSource("Framework.DataClass#cepvalido")
     public void realizarTesteDeContrato(String cepValido){
-        Response response =
+        Response payload =
                 given()
+                    .log().all()
                     .spec(requestSpecification)
                 .when()
-                    .get(cepValido)
+                    .get("/ws/"+cepValido+"/json/")
                 .then()
                     .log().body()
                     .assertThat()
                     .statusCode(200)
-                    .body(JsonSchemaValidator.matchesJsonSchemaInClasspath("json-schema.json"))
                     .extract().response();
+
+        payload.then().body(JsonSchemaValidator.matchesJsonSchemaInClasspath("json-schema.json"));
     }
 
     @Description("Consulta de cep válido")
@@ -37,35 +41,13 @@ public class GetConsultaCepApi extends TestBaseApi {
                 given()
                     .spec(requestSpecification)
                 .when()
-                    .get(cepValido)
+                    .get("/ws/"+cepValido+"/json/")
                 .then()
                     .log().body()
-                    .assertThat()
                     .statusCode(200)
                     .extract().response();
 
-        String cep = response.then().extract().path("cep");
-        String logradouro = response.then().extract().path("logradouro");
-        String complemento = response.then().extract().path("complemento");
-        String bairro = response.then().extract().path("bairro");
-        String localidade = response.then().extract().path("localidade");
-        String uf = response.then().extract().path("uf");
-        String ibge = response.then().extract().path("ibge");
-        String gia = response.then().extract().path("gia");
-        String ddd = response.then().extract().path("ddd");
-        String siafi = response.then().extract().path("siafi");
-
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("cep"),cep);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("logradouro"),logradouro);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("complemento"),complemento);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("bairro"),bairro);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("localidade"),localidade);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("uf"),uf);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("ibge"),ibge);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("gia"),gia);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("ddd"),ddd);
-        Assertions.assertEquals(FileOperation.getProperties("response").getProperty("siafi"),siafi);
-
+        ValidCepValidations.validateResponse(response, FIELDS);
     }
 
     @Description("Consulta de Cep inexistente")
